@@ -1,23 +1,29 @@
 import time
 
+import xlwt as xlwt
 from PyQt5.QtCore import QBasicTimer
 from PyQt5.QtGui import QTextCursor
 
 import mainwindow
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
 import serial
-from serialport_app import serialportwindow
-from database_app import databasewindow
-from valuechange_app import valuechangewindow
-from multicommand_app import multicommandwindow
+from serialconfig_wnd import SerialConfigWindow
+from database_wnd import DBWindow
+from valuechange_wnd import ValChangeWindow
+from cmd_wnd import CmdWindow
+from save_wnd import SaveApp
+import string
 
 class Application(QMainWindow):
     def __init__(self):
         super().__init__()
         mainwindown_ui = mainwindow.Ui_MainWindow()
         mainwindown_ui.setupUi(self)
+        mainwindown_ui.actionSave_2.triggered.connect(self.save_click)
         mainwindown_ui.actionExit_2.triggered.connect(self.close)
+        mainwindown_ui.actionStop.triggered.connect(self.save_paused)
+        mainwindown_ui.actionShow_record.triggered.connect(self.show_record)
         mainwindown_ui.actionSerial_port.triggered.connect(self.serial_port_show)
         mainwindown_ui.actionabout_Platform1_UI.triggered.connect(self.about_show)
         mainwindown_ui.actionOpen.triggered.connect(self.open_serial_port)
@@ -33,7 +39,7 @@ class Application(QMainWindow):
         mainwindown_ui.actionMulti_commands.triggered.connect(self.set_command_multi_commands)
 
         self.timer = QBasicTimer()  # Define timer to loop events
-        self.serial_window = serialportwindow.SerialPortApplication(self)
+        self.serial_window = SerialConfigWindow.SerialPortApplication(self)
         self.serial_port = ""
         self.baudrate = ""
         self.serial_device = serial.Serial()
@@ -41,10 +47,120 @@ class Application(QMainWindow):
 
         self.action_open = mainwindown_ui.actionOpen
         self.action_close = mainwindown_ui.actionClose
+        self.action_save = mainwindown_ui.actionSave_2
+        self.action_pause = mainwindown_ui.actionStop
+        self.action_show_record = mainwindown_ui.actionShow_record
 
-        self.database_window = databasewindow.DatabaseApplication(self)
-        self.value_change_window = valuechangewindow.ValueChangeApplication(self)
-        self.multi_CMD_window = multicommandwindow.MultiCMDApplication(self)
+        self.database_window = DBWindow.DatabaseApp(self)
+        self.value_change_window = ValChangeWindow.ValueChangeApp(self)
+        self.cmd_window = CmdWindow.MultiCMDApp(self)
+        self.saveWindow = SaveApp.SaveApp(self)
+        self.saveWindow.pauseBtn.clicked.connect(self.save_paused)
+
+        self.filepath = ""
+        self.workbook = None
+        self.row_number = 0
+
+    def save_click(self):
+        path, extension = QFileDialog.getSaveFileName(caption='Save file', directory='',
+                                                      filter='Excel(*.xls);;Text(*.txt)')
+        print(path, extension)
+        if path != "":
+            self.filepath = path
+            self.workbook = self.save_file_init(path)
+            self.action_save.setEnabled(False)
+            self.action_pause.setEnabled(True)
+            self.action_show_record.setEnabled(True)
+
+            self.saveWindow.show_window(path)
+
+    def save_file_init(self, file):
+        col_titles = [
+            "Time", "1 IR-F-R", "2 IR-B-R", "3 BL-F-R", "4 IR-F_X0", "5 IR-B_X0", "6 BL-F_X0",
+            "7 IR-F_S1_X0", "8 IR-B_S1_X0", "9 BL-F_S1_X0", "10 Amt_Light_FW", "11 Amt_Light_BW",
+            "12 IR-F/IR-B_MSB", "13 IR-F/IR-B_LSB", "14 BL-F/IR-B_MSB", "15 BL-F/IR-B_LSB", "16 BL-F/IR-F_MSB",
+            "17 BL-F/IR-F_MSB", "18 MW_State", "19 MSB", "20 LSB", "21 Equation", "22 F_Cnt", "23 F_Cnt",
+            "24 Ambient_IR-F", "25 Ambient_IR-B", "26 Ambient_Blue", "27 Change_IR-F", "28 Change_IR-B",
+            "29 Change_Blue", "30 Int_Cnt", "31 Int_Cnt", "","32 Alarm",
+        ]
+
+        style = self.get_xlwt_style()
+
+        workbook = xlwt.Workbook(encoding='utf-8')
+        hex_sheet = workbook.add_sheet('Hex data', cell_overwrite_ok=True)
+        dec_sheet = workbook.add_sheet('Dec data', cell_overwrite_ok=True)
+
+        if file.endswith("xls"):
+            for i, text in enumerate(col_titles):  # writing 32 bytes title to xls file.
+                hex_sheet.write(0, i, text, style)
+                dec_sheet.write(0, i, text, style)
+
+            self.set_xlwt_row_number(1)  # row number increase.
+            workbook.save(file)  # save workbook
+            return workbook
+        else:
+            with open(file, "a+", encoding="utf-8") as f:  # writing title information to txt file.
+                f.write("Time Serial_data ")
+                f.write("\n")
+            return None
+
+    def get_xlwt_style(self):
+        style = xlwt.XFStyle()
+        align = xlwt.Alignment()
+        align.horz = xlwt.Alignment.HORZ_CENTER
+        align.wrap = xlwt.Alignment.WRAP_AT_RIGHT
+        align.vert = xlwt.Alignment.VERT_CENTER
+        style.alignment = align
+        return style
+
+    def save_file(self, serial_data):
+        saved_bytes = 0
+        cur_time = time.strftime('%H:%M:%S', time.localtime())
+        text = serial_data.replace(">", "")
+        # text = text.encode("gbk", 'ignore').decode("gbk", "ignore")  # To ignore some mess up characters.
+
+        row_number = self.get_xlwt_row_number()
+        if self.filepath.endswith("xls"):
+            if len(text) > 95:
+                hex_sheet = self.workbook.get_sheet(0)
+                dec_sheet = self.workbook.get_sheet(1)
+                style = self.get_xlwt_style()
+
+                hex_sheet.write(row_number, 0, cur_time, style)
+                dec_sheet.write(row_number, 0, cur_time, style)
+                for i, element in enumerate(text.split(" ")):  # writing 32 bytes serial data from column 3 to 35
+                    hex_sheet.write(row_number, 1 + i, element, style)
+                    if all(c in string.hexdigits for c in element) and element != '':  # the last byte is alarm condition, condition outputs: "N" or "Y"
+                        dec_sheet.write(row_number, 1 + i, int(element, 16), style)  # convert hex to decimal
+                    else:
+                        dec_sheet.write(row_number, 1 + i, element, style)
+                    saved_bytes = i
+                self.set_xlwt_row_number(row_number + 1)  # row number increase
+                self.workbook.save(self.filepath)  # save workbook
+
+            return saved_bytes * 2
+        else:
+            saved_bytes = len(text)
+            with open(self.filepath, "a+", encoding="utf-8") as f:
+                f.write(f"{cur_time} {text}")
+                f.write("\n")
+            return saved_bytes
+
+    def get_xlwt_row_number(self):
+        return self.row_number
+
+    def set_xlwt_row_number(self, row_number):
+        self.row_number = row_number
+
+    def save_paused(self):
+        self.filepath = ""
+        self.workbook = None
+        self.action_save.setEnabled(True)
+        self.action_pause.setEnabled(False)
+        self.action_show_record.setEnabled(False)
+
+    def show_record(self):
+        self.saveWindow.show_window(self.filepath)
 
     def open_serial_port(self):
         print("serial device opened...")
@@ -90,13 +206,18 @@ class Application(QMainWindow):
         if serial_data != b'':
             lines = serial_data.decode("utf-8", errors='replace')
             cur_time = time.strftime('[%H:%M:%S] ', time.localtime())
-            for line in lines.split("\r"):
-                if line != "\r" and line != "":
+            if "\n" in lines:
+                lines = lines.replace("\n", "\r")
+            splited_lines = lines.split("\r")
+            for line in splited_lines:
+                if line != '':
                     line = cur_time + line
-                    # if len(self.tedit.toPlainText()) > 5000:  # almost every 50 lines, clear the buffer
-                    #     self.tedit.clear()
                     self.output_field.append(line)  # serial data showing on text field.
             self.output_field.moveCursor(QTextCursor.End)  # move cursor to the end.
+
+            if self.filepath != "":
+                saved_bytes = self.save_file(lines)
+                self.saveWindow.set_transferred_bytes(saved_bytes)
 
     def set_command_all_serial_on(self):
         print("set_command_all_serial_on")
@@ -176,7 +297,7 @@ class Application(QMainWindow):
 
     def set_command_multi_commands(self):
         print("set_command_multi_commands")
-        self.multi_CMD_window.show_window(self.serial_device)
+        self.cmd_window.show_window(self.serial_device)
 
 
 if __name__ == '__main__':

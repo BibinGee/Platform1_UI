@@ -132,4 +132,6 @@ minor_event_headers = {
     "17": "Power Reset Software Reset",
     "18": "Power Reset External Reset",
     "19": "Power Reset Brown Out Detection",
+    "20": "Enter Analysis Mode",
+    "21": "Exit Analysis Mode",
 }

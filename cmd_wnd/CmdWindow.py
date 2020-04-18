@@ -2,11 +2,11 @@ import sys
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
-from multicommand_app.multicommands import Ui_Form
+from cmd_wnd.multicommands import Ui_Form
 import time
 
 
-class MultiCMDApplication(QMainWindow):
+class MultiCMDApp(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         mainwindow_ui = Ui_Form()
@@ -37,6 +37,6 @@ class MultiCMDApplication(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = MultiCMDApplication()
+    ex = MultiCMDApp()
     ex.show()
     sys.exit(app.exec_())

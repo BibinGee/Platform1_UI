@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from serialport_app import serialport
+from serialconfig_wnd import serialport
 import serial.tools.list_ports
 
 

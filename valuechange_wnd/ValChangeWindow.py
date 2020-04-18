@@ -2,11 +2,11 @@ import sys
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
-from valuechange_app.valuechange import Ui_MainWindow
+from valuechange_wnd.valuechange import Ui_MainWindow
 import time
 
 
-class ValueChangeApplication(QMainWindow):
+class ValueChangeApp(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         mainwindow_ui = Ui_MainWindow()
@@ -44,6 +44,6 @@ class ValueChangeApplication(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = ValueChangeApplication()
+    ex = ValueChangeApp()
     ex.show()
     sys.exit(app.exec_())

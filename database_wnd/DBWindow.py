@@ -2,12 +2,12 @@ import sys
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
-from database_app.database import Ui_DatabaseWindow
-from database_app import config
+from database_wnd.database import Ui_DatabaseWindow
+from database_wnd import config
 import re
 
 
-class DatabaseApplication(QMainWindow):
+class DatabaseApp(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
         database_ui = Ui_DatabaseWindow()
@@ -103,10 +103,14 @@ class DatabaseApplication(QMainWindow):
         newitem.setTextAlignment(Qt.AlignCenter)
         return newitem
 
+    def show_window(self):
+        self.database_table.clear()
+        self.event_table.clear()
+        self.show()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = DatabaseApplication()
+    ex = DatabaseApp()
     ex.show()
     sys.exit(app.exec_())
