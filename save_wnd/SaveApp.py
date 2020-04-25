@@ -1,6 +1,7 @@
 import sys
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
 from save_wnd.save import Ui_Form
 
@@ -8,6 +9,8 @@ from save_wnd.save import Ui_Form
 class SaveApp(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
+        self.setWindowIcon(QIcon("../platformUI.ico"))
+
         save_ui = Ui_Form()
         save_ui.setupUi(self)
 

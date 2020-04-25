@@ -1,6 +1,7 @@
 import sys
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
 from database_wnd.database import Ui_DatabaseWindow
 from database_wnd import config
@@ -10,18 +11,19 @@ import re
 class DatabaseApp(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
+        self.setWindowIcon(QIcon("../platformUI.ico"))
+
         database_ui = Ui_DatabaseWindow()
         database_ui.setupUi(self)
 
         self.database_table = database_ui.database_table
-        self.event_table = database_ui.event_hisotry_table
+        self.major_event_table = database_ui.major_event_table
+        self.minor_event_table = database_ui.minor_event_table
 
         self.database_table.setColumnWidth(0, 60)
         self.database_table.setColumnWidth(1, 100)
         self.database_table.setColumnWidth(2, 500)
         self.database_table.setColumnWidth(3, 100)
-
-        self.event_table.setColumnWidth(3, 400)
 
         # self.fill_in_database_headers()
 
@@ -58,47 +60,37 @@ class DatabaseApp(QMainWindow):
         # print(minor_events, minor_event_days)
 
         if major_event_list != [] and major_event_days != []:
-            row_number = 0
-            self.event_table.setSpan(row_number, 0, 1, 5)
-            self.event_table.setItem(row_number, 0, self.format_item("Major Event List"))
-
-            row_number += 1
-
             for i, day in enumerate(major_event_days):
                 if major_events[2*i].replace(" ", "") in config.major_event_headers:
-                    self.event_table.setItem(i + row_number, 0, self.format_item(str(i)))
-                    self.event_table.setItem(i + row_number, 1, self.format_item(major_events[2*i]))
-                    self.event_table.setItem(i + row_number, 2, self.format_item(major_events[2*i +1]))
-                    self.event_table.setItem(i + row_number, 3, self.format_item(config.major_event_headers[major_events[2*i].replace(" ", "")]))
-                    self.event_table.setItem(i + row_number, 4, self.format_item(day))
+                    self.major_event_table.setItem(i, 0, self.format_item(str(i)))
+                    self.major_event_table.setItem(i, 1, self.format_item(major_events[2*i]))
+                    self.major_event_table.setItem(i, 2, self.format_item(major_events[2*i +1]))
+                    self.major_event_table.setItem(i, 3, self.format_item(config.major_event_headers[major_events[2*i].replace(" ", "")]))
+                    self.major_event_table.setItem(i, 4, self.format_item(day))
                 else:
-                    self.event_table.setItem(i + row_number, 0, self.format_item(str(i)))
-                    self.event_table.setItem(i + row_number, 1, self.format_item(major_events[2*i]))
-                    self.event_table.setItem(i + row_number, 2, self.format_item(major_events[2*i +1]))
-                    self.event_table.setItem(i + row_number, 3, self.format_item("undefined event ID"))
-                    self.event_table.setItem(i + row_number, 4, self.format_item(day))
+                    self.major_event_table.setItem(i, 0, self.format_item(str(i)))
+                    self.major_event_table.setItem(i, 1, self.format_item(major_events[2*i]))
+                    self.major_event_table.setItem(i, 2, self.format_item(major_events[2*i +1]))
+                    self.major_event_table.setItem(i, 3, self.format_item("undefined event ID"))
+                    self.major_event_table.setItem(i, 4, self.format_item(day))
         #
         if minor_event_list != [] and minor_event_days != []:
-            row_number += 1
-            self.event_table.setSpan(row_number, 0, 1, 5)
-            self.event_table.setItem(row_number, 0, self.format_item("Minor Event List"))
-
-            row_number += 1
             for j, day in enumerate(minor_event_days):
                 if minor_events[2*j].replace(" ", "") in config.minor_event_headers:
-                    self.event_table.setItem(j + row_number, 0, self.format_item(str(j)))
-                    self.event_table.setItem(j + row_number, 1, self.format_item(minor_events[2*j]))
-                    self.event_table.setItem(j + row_number, 2, self.format_item(minor_events[2*j +1]))
-                    self.event_table.setItem(j + row_number, 3, self.format_item(config.minor_event_headers[minor_events[2*j].replace(" ", "")]))
-                    self.event_table.setItem(j + row_number, 4, self.format_item(day))
+                    self.minor_event_table.setItem(j, 0, self.format_item(str(j)))
+                    self.minor_event_table.setItem(j, 1, self.format_item(minor_events[2*j]))
+                    self.minor_event_table.setItem(j, 2, self.format_item(minor_events[2*j + 1]))
+                    self.minor_event_table.setItem(j, 3, self.format_item(config.minor_event_headers[minor_events[2*j].replace(" ", "")]))
+                    self.minor_event_table.setItem(j, 4, self.format_item(day))
                 else:
-                    self.event_table.setItem(j + row_number, 0, self.format_item(str(j)))
-                    self.event_table.setItem(j + row_number, 1, self.format_item(minor_events[2*j]))
-                    self.event_table.setItem(j + row_number, 2, self.format_item(minor_events[2*j + 1]))
-                    self.event_table.setItem(j + row_number, 3, self.format_item("undefined event ID"))
-                    self.event_table.setItem(j + row_number, 4, self.format_item(day))
+                    self.minor_event_table.setItem(j, 0, self.format_item(str(j)))
+                    self.minor_event_table.setItem(j, 1, self.format_item(minor_events[2*j]))
+                    self.minor_event_table.setItem(j, 2, self.format_item(minor_events[2*j + 1]))
+                    self.minor_event_table.setItem(j, 3, self.format_item("undefined event ID"))
+                    self.minor_event_table.setItem(j, 4, self.format_item(day))
 
-    def format_item(self, item):
+    @staticmethod
+    def format_item(item):
         newitem = QTableWidgetItem(item)
         newitem.setTextAlignment(Qt.AlignCenter)
         return newitem

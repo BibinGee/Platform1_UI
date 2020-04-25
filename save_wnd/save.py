@@ -70,7 +70,7 @@ class Ui_Form(object):
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
+        Form.setWindowTitle(_translate("Form", "保存"))
         self.label.setText(_translate("Form", "文件路径"))
         self.label_2.setText(_translate("Form", "传输字节"))
         self.pauseBtn.setText(_translate("Form", "停止"))

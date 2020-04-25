@@ -2,22 +2,25 @@ import time
 
 import xlwt as xlwt
 from PyQt5.QtCore import QBasicTimer
-from PyQt5.QtGui import QTextCursor
+from PyQt5.QtGui import QTextCursor, QIcon
 
 import mainwindow
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QInputDialog, QLineEdit
 import serial
 from serialconfig_wnd import SerialConfigWindow
 from database_wnd import DBWindow
 from valuechange_wnd import ValChangeWindow
 from cmd_wnd import CmdWindow
 from save_wnd import SaveApp
+from setwindowtitle_wind import SetWindTitleWindow
 import string
 
 class Application(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowIcon(QIcon("platformUI.ico"))
+
         mainwindown_ui = mainwindow.Ui_MainWindow()
         mainwindown_ui.setupUi(self)
         mainwindown_ui.actionSave_2.triggered.connect(self.save_click)
@@ -28,7 +31,10 @@ class Application(QMainWindow):
         mainwindown_ui.actionabout_Platform1_UI.triggered.connect(self.about_show)
         mainwindown_ui.actionOpen.triggered.connect(self.open_serial_port)
         mainwindown_ui.actionClose.triggered.connect(self.close_serial_port)
-        mainwindown_ui.actionAll_Seriap_output_ON.triggered.connect(self.set_command_all_serial_on)
+        mainwindown_ui.actionAll_serial_output_ON.triggered.connect(self.set_command_all_serial_on)
+        mainwindown_ui.actionCloseSerial.triggered.connect(self.set_serial_output_clsoed)
+        mainwindown_ui.actionOnly_Smoke_output.triggered.connect(self.set_serial_smoke_only)
+        mainwindown_ui.actionOnly_CO_output.triggered.connect(self.set_serial_CO_only)
         mainwindown_ui.actionG_dump.triggered.connect(self.set_command_G_dump)
         mainwindown_ui.actionCheck_FW_revision.triggered.connect(self.set_command_check_fw_revision)
         mainwindown_ui.actionForce_analysis_mode.triggered.connect(self.set_command_force_analysis_mode)
@@ -37,14 +43,20 @@ class Application(QMainWindow):
         mainwindown_ui.actionSkip_HD2.triggered.connect(self.set_command_skip_hd2_cal)
         mainwindown_ui.actionSkip_2_Point_Cal.triggered.connect(self.set_command_skip_2_point_cal)
         mainwindown_ui.actionMulti_commands.triggered.connect(self.set_command_multi_commands)
+        mainwindown_ui.actionL0.triggered.connect(self.set_command_L0)
+        mainwindown_ui.actionL1.triggered.connect(self.set_command_L1)
+        mainwindown_ui.actionL4.triggered.connect(self.set_command_L4)
+        mainwindown_ui.actionL5.triggered.connect(self.set_command_L5)
+        mainwindown_ui.actionSetWindTitle.triggered.connect(self.show_set_window)
 
         self.timer = QBasicTimer()  # Define timer to loop events
-        self.serial_window = SerialConfigWindow.SerialPortApplication(self)
+        self.serial_window = SerialConfigWindow.SerialPortApp(self)
         self.serial_port = ""
         self.baudrate = ""
         self.serial_device = serial.Serial()
         self.output_field = mainwindown_ui.outputfield
 
+        self.command_menu = mainwindown_ui.menuCommand
         self.action_open = mainwindown_ui.actionOpen
         self.action_close = mainwindown_ui.actionClose
         self.action_save = mainwindown_ui.actionSave_2
@@ -56,6 +68,8 @@ class Application(QMainWindow):
         self.cmd_window = CmdWindow.MultiCMDApp(self)
         self.saveWindow = SaveApp.SaveApp(self)
         self.saveWindow.pauseBtn.clicked.connect(self.save_paused)
+        self.setWinTitle = SetWindTitleWindow.SetWindTItleApp()
+        self.setWinTitle.ok_button.clicked.connect(self.set_window_title)
 
         self.filepath = ""
         self.workbook = None
@@ -171,7 +185,9 @@ class Application(QMainWindow):
                 self.serial_device.port = self.serial_window.port
                 self.serial_device.baudrate = self.serial_window.baudrate
                 self.serial_device.open()
+                self.action_open.setEnabled(False)
                 self.action_close.setEnabled(True)
+                self.command_menu.setEnabled(True)
                 print(f"{self.serial_window.port} opened, baud rate: {self.serial_window.baudrate}")
 
             except serial.serialutil.SerialException as e:
@@ -188,9 +204,11 @@ class Application(QMainWindow):
         self.serial_device.close()
         self.timer.stop()
         self.action_close.setEnabled(False)
+        self.action_open.setEnabled(True)
+        self.command_menu.setEnabled(False)
 
     def serial_port_show(self):
-        self.serial_window.show()
+        self.serial_window.show_window()
         self.action_open.setEnabled(True)
 
     def about_show(self):
@@ -219,10 +237,29 @@ class Application(QMainWindow):
                 saved_bytes = self.save_file(lines)
                 self.saveWindow.set_transferred_bytes(saved_bytes)
 
+    def show_set_window(self):
+        self.setWinTitle.show()
+
+    def set_window_title(self):
+        self.setWinTitle.close()
+        self.setWindowTitle(self.setWinTitle.getText())
+
     def set_command_all_serial_on(self):
         print("set_command_all_serial_on")
         self.serial_device.write("BA\r".encode())
         self.output_field.append("BA")
+
+    def set_serial_output_clsoed(self):
+        print("set_serial_output_clsoed")
+        self.serial_device.write("BZ\r".encode())
+
+    def set_serial_smoke_only(self):
+        print("set_serial_smoke_only")
+        self.serial_device.write("BE\r".encode())
+
+    def set_serial_CO_only(self):
+        print("set_serial_CO_only")
+        self.serial_device.write("BC\r".encode())
 
     def set_command_G_dump(self):
         print("set_command_G_dump")
@@ -298,6 +335,22 @@ class Application(QMainWindow):
     def set_command_multi_commands(self):
         print("set_command_multi_commands")
         self.cmd_window.show_window(self.serial_device)
+
+    def set_command_L0(self):
+        print("set_command_L0")
+        self.serial_device.write("L0\r".encode())
+
+    def set_command_L1(self):
+        print("set_command_L1")
+        self.serial_device.write("L1\r".encode())
+
+    def set_command_L4(self):
+        print("set_command_L4")
+        self.serial_device.write("L4\r".encode())
+
+    def set_command_L5(self):
+        print("set_command_L5")
+        self.serial_device.write("L5\r".encode())
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import sys
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
 from cmd_wnd.multicommands import Ui_Form
 import time
@@ -9,6 +10,8 @@ import time
 class MultiCMDApp(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
+        self.setWindowIcon(QIcon("../platformUI.ico"))
+
         mainwindow_ui = Ui_Form()
         mainwindow_ui.setupUi(self)
 
