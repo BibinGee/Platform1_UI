@@ -16,6 +16,7 @@ from save_wnd import SaveApp
 from setwindowtitle_wind import SetWindTitleWindow
 import string
 
+
 class Application(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -95,7 +96,7 @@ class Application(QMainWindow):
             "12 IR-F/IR-B_MSB", "13 IR-F/IR-B_LSB", "14 BL-F/IR-B_MSB", "15 BL-F/IR-B_LSB", "16 BL-F/IR-F_MSB",
             "17 BL-F/IR-F_MSB", "18 MW_State", "19 MSB", "20 LSB", "21 Equation", "22 F_Cnt", "23 F_Cnt",
             "24 Ambient_IR-F", "25 Ambient_IR-B", "26 Ambient_Blue", "27 Change_IR-F", "28 Change_IR-B",
-            "29 Change_Blue", "30 Int_Cnt", "31 Int_Cnt", "","32 Alarm",
+            "29 Change_Blue", "30 Int_Cnt", "31 Int_Cnt", "", "32 Alarm",
         ]
 
         style = self.get_xlwt_style()
@@ -144,7 +145,8 @@ class Application(QMainWindow):
                 dec_sheet.write(row_number, 0, cur_time, style)
                 for i, element in enumerate(text.split(" ")):  # writing 32 bytes serial data from column 3 to 35
                     hex_sheet.write(row_number, 1 + i, element, style)
-                    if all(c in string.hexdigits for c in element) and element != '':  # the last byte is alarm condition, condition outputs: "N" or "Y"
+                    if all(c in string.hexdigits for c in
+                           element) and element != '':  # the last byte is alarm condition, condition outputs: "N" or "Y"
                         dec_sheet.write(row_number, 1 + i, int(element, 16), style)  # convert hex to decimal
                     else:
                         dec_sheet.write(row_number, 1 + i, element, style)
