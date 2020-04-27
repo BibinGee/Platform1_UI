@@ -65,13 +65,13 @@ class DatabaseApp(QMainWindow):
                     self.major_event_table.setItem(i, 0, self.format_item(str(i)))
                     self.major_event_table.setItem(i, 1, self.format_item(major_events[2*i]))
                     self.major_event_table.setItem(i, 2, self.format_item(major_events[2*i +1]))
-                    self.major_event_table.setItem(i, 3, self.format_item(config.major_event_headers[major_events[2*i].replace(" ", "")]))
+                    self.major_event_table.setItem(i, 3,QTableWidgetItem(config.major_event_headers[major_events[2*i].replace(" ", "")]))
                     self.major_event_table.setItem(i, 4, self.format_item(day))
                 else:
                     self.major_event_table.setItem(i, 0, self.format_item(str(i)))
                     self.major_event_table.setItem(i, 1, self.format_item(major_events[2*i]))
                     self.major_event_table.setItem(i, 2, self.format_item(major_events[2*i +1]))
-                    self.major_event_table.setItem(i, 3, self.format_item("undefined event ID"))
+                    self.major_event_table.setItem(i, 3, QTableWidgetItem("undefined event ID"))
                     self.major_event_table.setItem(i, 4, self.format_item(day))
         #
         if minor_event_list != [] and minor_event_days != []:
@@ -80,13 +80,13 @@ class DatabaseApp(QMainWindow):
                     self.minor_event_table.setItem(j, 0, self.format_item(str(j)))
                     self.minor_event_table.setItem(j, 1, self.format_item(minor_events[2*j]))
                     self.minor_event_table.setItem(j, 2, self.format_item(minor_events[2*j + 1]))
-                    self.minor_event_table.setItem(j, 3, self.format_item(config.minor_event_headers[minor_events[2*j].replace(" ", "")]))
+                    self.minor_event_table.setItem(j, 3, QTableWidgetItem(config.minor_event_headers[minor_events[2*j].replace(" ", "")]))
                     self.minor_event_table.setItem(j, 4, self.format_item(day))
                 else:
                     self.minor_event_table.setItem(j, 0, self.format_item(str(j)))
                     self.minor_event_table.setItem(j, 1, self.format_item(minor_events[2*j]))
                     self.minor_event_table.setItem(j, 2, self.format_item(minor_events[2*j + 1]))
-                    self.minor_event_table.setItem(j, 3, self.format_item("undefined event ID"))
+                    self.minor_event_table.setItem(j, 3, QTableWidgetItem("undefined event ID"))
                     self.minor_event_table.setItem(j, 4, self.format_item(day))
 
     @staticmethod

@@ -101,6 +101,7 @@ p, li { white-space: pre-wrap; }
     <addaction name="separator"/>
     <addaction name="actionClose"/>
     <addaction name="actionSetWindTitle"/>
+    <addaction name="actionClearbuffer"/>
    </widget>
    <widget class="QMenu" name="menuCommand">
     <property name="enabled">
@@ -487,6 +488,16 @@ p, li { white-space: pre-wrap; }
   <action name="actionSetWindTitle">
    <property name="text">
     <string>设置窗口标题</string>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+  </action>
+  <action name="actionClearbuffer">
+   <property name="text">
+    <string>清空缓存</string>
    </property>
    <property name="font">
     <font>

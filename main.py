@@ -49,6 +49,7 @@ class Application(QMainWindow):
         mainwindown_ui.actionL4.triggered.connect(self.set_command_L4)
         mainwindown_ui.actionL5.triggered.connect(self.set_command_L5)
         mainwindown_ui.actionSetWindTitle.triggered.connect(self.show_set_window)
+        mainwindown_ui.actionClearbuffer.triggered.connect(self.clear_buffer)
 
         self.timer = QBasicTimer()  # Define timer to loop events
         self.serial_window = SerialConfigWindow.SerialPortApp(self)
@@ -86,8 +87,9 @@ class Application(QMainWindow):
             self.action_save.setEnabled(False)
             self.action_pause.setEnabled(True)
             self.action_show_record.setEnabled(True)
-
             self.saveWindow.show_window(path)
+            self.saveWindow.clear_transferred_bytes()
+            self.saveWindow.pauseBtn.setEnabled(True)
 
     def save_file_init(self, file):
         col_titles = [
@@ -151,6 +153,7 @@ class Application(QMainWindow):
                     else:
                         dec_sheet.write(row_number, 1 + i, element, style)
                     saved_bytes = i
+
                 self.set_xlwt_row_number(row_number + 1)  # row number increase
                 self.workbook.save(self.filepath)  # save workbook
 
@@ -174,6 +177,7 @@ class Application(QMainWindow):
         self.action_save.setEnabled(True)
         self.action_pause.setEnabled(False)
         self.action_show_record.setEnabled(False)
+        self.saveWindow.pauseBtn.setEnabled(False)
 
     def show_record(self):
         self.saveWindow.show_window(self.filepath)
@@ -212,6 +216,9 @@ class Application(QMainWindow):
     def serial_port_show(self):
         self.serial_window.show_window()
         self.action_open.setEnabled(True)
+
+    def clear_buffer(self):
+        self.output_field.clear()
 
     def about_show(self):
         from about import about

@@ -34,6 +34,10 @@ class SaveApp(QMainWindow):
         self.saved_number += byte_number
         self.byte_field.setText(f"{self.saved_number} bytes transferred")
 
+    def clear_transferred_bytes(self):
+        self.saved_number = 0
+        self.byte_field.setText("")
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
