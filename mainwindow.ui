@@ -157,6 +157,7 @@ p, li { white-space: pre-wrap; }
     </widget>
     <addaction name="menu"/>
     <addaction name="actionG_dump"/>
+    <addaction name="actionGet_event_history"/>
     <addaction name="actionCheck_FW_revision"/>
     <addaction name="actionForce_analysis_mode"/>
     <addaction name="actionBattery_test"/>
@@ -503,6 +504,11 @@ p, li { white-space: pre-wrap; }
     <font>
      <pointsize>10</pointsize>
     </font>
+   </property>
+  </action>
+  <action name="actionGet_event_history">
+   <property name="text">
+    <string>Event history list</string>
    </property>
   </action>
  </widget>

@@ -8,7 +8,7 @@ from setwindowtitle_wind.setwindtitle import Ui_SetWindowTitleForm
 class SetWindTItleApp(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
-        self.setWindowIcon(QIcon("../platformUI.ico"))
+        self.setWindowIcon(QIcon("icon/platformUI.ico"))
 
         ui = Ui_SetWindowTitleForm()
         ui.setupUi(self)

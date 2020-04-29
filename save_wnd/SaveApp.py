@@ -9,7 +9,7 @@ from save_wnd.save import Ui_Form
 class SaveApp(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
-        self.setWindowIcon(QIcon("../platformUI.ico"))
+        self.setWindowIcon(QIcon("icon/platformUI.ico"))
 
         save_ui = Ui_Form()
         save_ui.setupUi(self)

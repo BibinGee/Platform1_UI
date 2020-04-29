@@ -9,7 +9,9 @@ import serial.tools.list_ports
 class SerialPortApp(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
-        self.setWindowIcon(QIcon("../platformUI.ico"))
+        self.setWindowIcon(QIcon("icon/platformUI.ico"))
+        self.setFixedWidth(400)
+        self.setFixedHeight(250)
 
         serial_port_ui = serialport.Ui_MainWindow()
         serial_port_ui.setupUi(self)

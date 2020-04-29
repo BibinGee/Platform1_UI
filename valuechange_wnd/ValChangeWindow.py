@@ -10,7 +10,7 @@ import time
 class ValueChangeApp(QMainWindow):
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
-        self.setWindowIcon(QIcon("../platformUI.ico"))
+        self.setWindowIcon(QIcon("icon/platformUI.ico"))
 
         mainwindow_ui = Ui_MainWindow()
         mainwindow_ui.setupUi(self)

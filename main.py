@@ -14,13 +14,14 @@ from valuechange_wnd import ValChangeWindow
 from cmd_wnd import CmdWindow
 from save_wnd import SaveApp
 from setwindowtitle_wind import SetWindTitleWindow
+from event_wnd import EHWindow
 import string
 
 
 class Application(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowIcon(QIcon("platformUI.ico"))
+        self.setWindowIcon(QIcon("icon/platformUI.ico"))
 
         mainwindown_ui = mainwindow.Ui_MainWindow()
         mainwindown_ui.setupUi(self)
@@ -50,6 +51,7 @@ class Application(QMainWindow):
         mainwindown_ui.actionL5.triggered.connect(self.set_command_L5)
         mainwindown_ui.actionSetWindTitle.triggered.connect(self.show_set_window)
         mainwindown_ui.actionClearbuffer.triggered.connect(self.clear_buffer)
+        mainwindown_ui.actionGet_event_history.triggered.connect(self.set_command_get_event_history)
 
         self.timer = QBasicTimer()  # Define timer to loop events
         self.serial_window = SerialConfigWindow.SerialPortApp(self)
@@ -65,13 +67,15 @@ class Application(QMainWindow):
         self.action_pause = mainwindown_ui.actionStop
         self.action_show_record = mainwindown_ui.actionShow_record
 
-        self.database_window = DBWindow.DatabaseApp(self)
+        self.database_window = None
         self.value_change_window = ValChangeWindow.ValueChangeApp(self)
         self.cmd_window = CmdWindow.MultiCMDApp(self)
         self.saveWindow = SaveApp.SaveApp(self)
         self.saveWindow.pauseBtn.clicked.connect(self.save_paused)
         self.setWinTitle = SetWindTitleWindow.SetWindTItleApp()
         self.setWinTitle.ok_button.clicked.connect(self.set_window_title)
+
+        self.event_history_window = None
 
         self.filepath = ""
         self.workbook = None
@@ -232,14 +236,14 @@ class Application(QMainWindow):
         serial_data = self.serial_device.readline()
         if serial_data != b'':
             lines = serial_data.decode("utf-8", errors='replace')
-            cur_time = time.strftime('[%H:%M:%S] ', time.localtime())
-            if "\n" in lines:
-                lines = lines.replace("\n", "\r")
-            splited_lines = lines.split("\r")
-            for line in splited_lines:
-                if line != '':
-                    line = cur_time + line
-                    self.output_field.append(line)  # serial data showing on text field.
+            # cur_time = time.strftime('[%H:%M:%S] ', time.localtime())
+            # if "\n" in lines:
+            #     lines = lines.replace("\n", "\r")
+            # splited_lines = lines.split("\r")
+            # for line in splited_lines:
+            #     if line != '':
+            #         line = cur_time + line
+            self.output_field.append(lines)  # serial data showing on text field.
             self.output_field.moveCursor(QTextCursor.End)  # move cursor to the end.
 
             if self.filepath != "":
@@ -274,18 +278,31 @@ class Application(QMainWindow):
         print("set_command_G_dump")
         if self.serial_device.isOpen():
             try:
+                self.database_window = DBWindow.DatabaseApp(self)
                 self.serial_device.write("G1\r".encode())
                 self.output_field.append("G1")
-                time.sleep(0.2)
+                time.sleep(1)
                 database = self.serial_device.readline()
                 database = database.decode("utf-8", errors='replace')
                 self.output_field.append(database)
                 database_map = database.split('\r')[2:]
                 self.database_window.fill_in_database(database_map)
 
+                self.database_window.show()
+
+            except Exception as e:
+                print(e)
+
+    def set_command_get_event_history(self):
+        print("set_command_G_dump")
+        if self.serial_device.isOpen():
+            try:
+                # self.event_history_window.clear_table()
+                self.event_history_window = EHWindow.EventHistoryApp()
+
                 self.serial_device.write("G4\r".encode())
                 self.output_field.append("G4")
-                time.sleep(0.2)
+                time.sleep(0.5)
                 major_event_list = self.serial_device.readline()
                 print(f"major event list: {major_event_list}")
                 major_event_list = major_event_list.decode("utf-8", errors='replace')
@@ -293,15 +310,14 @@ class Application(QMainWindow):
 
                 self.serial_device.write("G5\r".encode())
                 self.output_field.append("G5")
-                time.sleep(0.2)
+                time.sleep(0.5)
                 minor_event_list = self.serial_device.readline()
                 print(f"minor event list: {minor_event_list}")
                 minor_event_list = minor_event_list.decode("utf-8", errors='replace')
                 self.output_field.append(minor_event_list)
+                self.event_history_window.fill_in_event_list(major_event_list, minor_event_list)
 
-                self.database_window.fill_in_event_list(major_event_list, minor_event_list)
-
-                self.database_window.show()
+                self.event_history_window.show()
 
             except Exception as e:
                 print(e)
